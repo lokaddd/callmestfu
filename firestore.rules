@@ -1,0 +1,24 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // документы корзины: только владелец может читать/писать
+    match /carts/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // заказы: создание и чтение только владельцем
+    match /orders/{orderId} {
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      // запретим изменение/удаление заказов клиентом (администратор через Cloud Functions)
+      allow update, delete: if false;
+    }
+
+    // для всех остальных коллекций по умолчанию запретим
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

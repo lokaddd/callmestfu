@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Вход — Сыроварня Любимая</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+  <div class="logo-name"><img alt="image" src="./image/logo1.png" class="logo-nav">
+  <a href="index.html" class="logo">Сыроварня Любимая</a></div>
+  <nav>
+    <a href="index.html">Главная</a>
+    <a href="about.html">О нас</a>
+    <a href="products.html">Продукция</a>
+    <a href="contacts.html">Контакты</a>
+    <a href="cart.html">Корзина</a>
+    <a href="login.html" id="auth-link">Вход</a>
+  </nav>
+  <div class="burger">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+</header>
+
+<div class="mobile-menu">
+  <div class="close-menu">&times;</div>
+  <a href="index.html">Главная</a>
+  <a href="about.html">О нас</a>
+  <a href="products.html">Продукция</a>
+  <a href="contacts.html">Контакты</a>
+  <a href="cart.html">Корзина</a>
+  <a href="login.html" id="auth-link-mobile">Вход</a>
+</div>
+
+  <main style="max-width:480px;margin:50px auto;padding:0 16px;">
+    <h1>Вход</h1>
+    <form id="login-form">
+      <label>Email<br><input type="email" name="email" required /></label><br><br>
+      <label>Пароль<br><input type="password" name="password" required /></label><br><br>
+      <button class="button-primary" type="submit">Войти</button>
+    </form>
+    <p>Нет аккаунта? <a href="register.html">Зарегистрироваться</a></p>
+  </main>
+
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

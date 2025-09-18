@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Корзина — Сыроварня Любимая</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+  <div class="logo-name"><img alt="image" src="./image/logo1.png" class="logo-nav">
+  <a href="index.html" class="logo">Сыроварня Любимая</a></div>
+  <nav>
+    <a href="index.html">Главная</a>
+    <a href="about.html">О нас</a>
+    <a href="products.html">Продукция</a>
+    <a href="contacts.html">Контакты</a>
+    <a href="cart.html">Корзина</a>
+    <a href="login.html" id="auth-link">Вход</a>
+  </nav>
+  <div class="burger">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+</header>
+
+<div class="mobile-menu">
+  <div class="close-menu">&times;</div>
+  <a href="index.html">Главная</a>
+  <a href="about.html">О нас</a>
+  <a href="products.html">Продукция</a>
+  <a href="contacts.html">Контакты</a>
+  <a href="cart.html">Корзина</a>
+  <a href="login.html" id="auth-link-mobile">Вход</a>
+</div>
+
+  <main style="max-width:900px;margin:40px auto;padding:0 16px;">
+    <h1>Ваша корзина</h1>
+    <div id="cart-area">Загрузка...</div>
+    <div id="checkout-area" style="display:none;margin-top:20px;">
+      <h3>Контактные данные</h3>
+      <input id="contact-name" placeholder="Имя" style="padding:8px;margin:6px 0;width:100%"/>
+      <input id="contact-phone" placeholder="Телефон" style="padding:8px;margin:6px 0;width:100%"/>
+      <button id="place-order-btn" class="button-primary">Оформить заказ</button>
+    </div>
+  </main>
+
+  <script type="module" src="/app.js"></script>
+  <script>
+    async function renderCart(){
+      const container = document.getElementById('cart-area');
+      container.innerHTML = 'Загрузка...';
+      const items = await window.lubimayaCart.loadCartForCurrentUser();
+      if (!items || items.length === 0){
+        container.innerHTML = '<p>Корзина пуста.</p>';
+        document.getElementById('checkout-area').style.display = 'none';
+        return;
+      }
+      // сгруппируем по id и суммируем qty
+      const map = {};
+      items.forEach(it => {
+        if (!map[it.id]) map[it.id] = { ...it };
+        else map[it.id].qty = (map[it.id].qty || 1) + (it.qty || 1);
+      });
+      const list = Object.values(map);
+      let html = '<table style="width:100%;border-collapse:collapse;"><thead><tr><th>Товар</th><th>Кол-во</th><th>Цена</th><th>Сумма</th></tr></thead><tbody>';
+      let total = 0;
+      list.forEach(it=>{
+        const sum = (it.price || 0) * (it.qty || 1);
+        total += sum;
+        html += `<tr>
+                  <td style="padding:8px;border-bottom:1px solid #eee">${it.name}</td>
+                  <td style="padding:8px;border-bottom:1px solid #eee">${it.qty}</td>
+                  <td style="padding:8px;border-bottom:1px solid #eee">${it.price} ₽</td>
+                  <td style="padding:8px;border-bottom:1px solid #eee">${sum} ₽</td>
+                 </tr>`;
+      });
+      html += `</tbody></table><p style="text-align:right;font-weight:700;margin-top:12px;">Итого: ${total} ₽</p>`;
+      container.innerHTML = html;
+      document.getElementById('checkout-area').style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await renderCart();
+
+      document.getElementById('place-order-btn').addEventListener('click', async ()=>{
+        const name = document.getElementById('contact-name').value.trim();
+        const phone = document.getElementById('contact-phone').value.trim();
+        if (!name || !phone){ alert('Введите имя и телефон'); return; }
+        const items = await window.lubimayaCart.loadCartForCurrentUser();
+        // если пользователь не залогинен — попросим залогиниться
+        // app.js проверяет и выбросит ошибку, но здесь можно проверить:
+        // Попробуем вызвать placeOrder, при ошибке предложим войти
+        try{
+          // placeOrder требует авторизации — в апи app.js он бросает ошибку, если неавторизован
+          const uid = (window.currentUser && window.currentUser.uid) || null;
+          // call placeOrder (it requires auth inside app.js)
+          const orderId = await window.lubimayaCart.placeOrder(window.currentUser, items, { name, phone });
+          alert('Заказ оформлен. Номер: ' + orderId);
+          // после оформления перерисуем корзину
+          await renderCart();
+        } catch(e){
+          console.error(e);
+          alert('Для оформления заказа необходимо войти. Переадресация на страницу входа.');
+          window.location.href = 'login.html';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
